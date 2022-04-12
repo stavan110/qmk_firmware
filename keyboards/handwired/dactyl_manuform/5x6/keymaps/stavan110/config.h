@@ -27,10 +27,15 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 // Home-Row-Mod configuration
 // Configure the global tapping term (default: 200ms)
-#define TAPPING_TERM 300
+#define TAPPING_TERM 350
 
 // Prevent normal rollover on alphas from accidentally triggering mods.
 #define IGNORE_MOD_TAP_INTERRUPT
+
+// Disable PERMISSIVE_HOLD
+// (It's enabled dy default for all Dactyl Manuform boards,
+// so it requires explicit undef to disable)
+#undef PERMISSIVE_HOLD
 
 // Enable rapid switch from tap to hold, disables double tap hold auto-repeat.
 #define TAPPING_FORCE_HOLD
