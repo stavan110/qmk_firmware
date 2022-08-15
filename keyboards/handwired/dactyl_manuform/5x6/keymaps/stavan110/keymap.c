@@ -1,145 +1,562 @@
+/* Colemak DHm with home row mods and hybrid steno
+ * for the Dactyl Manuform 5x6 Keyboard */
+
 #include QMK_KEYBOARD_H
+#include "keymap_steno.h"
+#include "features/select_word.h"
+#ifdef CONSOLE_ENABLE
+#include "print.h"
+#endif
 
-// easy layout wrappers
-#define LAYOUT_wrapper(...)                 LAYOUT(__VA_ARGS__)
-#define LAYOUT_5x6_wrapper(...)             LAYOUT_5x6(__VA_ARGS__)
+// All custom keycodes and aliases can be found in keymap.h
+#include "keymap.h"
 
-
-
-
-
-
-// ---------------------- Keymaps section ----------------------
-
-#define KC_MLSF OSM(MOD_LSFT)
-#define KC_MRSF OSM(MOD_RSFT)
-
-#define OS_LGUI OSM(MOD_LGUI)
-#define OS_RGUI OSM(MOD_RGUI)
-#define OS_LSFT OSM(MOD_LSFT)
-#define OS_RSFT OSM(MOD_RSFT)
-#define OS_LCTL OSM(MOD_LCTL)
-#define OS_RCTL OSM(MOD_RCTL)
-#define OS_LALT OSM(MOD_LALT)
-#define OS_RALT OSM(MOD_RALT)
-#define OS_MEH  OSM(MOD_MEH)
-#define OS_HYPR OSM(MOD_HYPR)
-#define MOUSE_L LSFT(KC_WH_D)
-#define MOUSE_R LSFT(KC_WH_U)
-#define OSX_LOCK LCTL(LGUI(KC_Q))
-
-
-// Left-hand home row mods
-#define GUI_A LGUI_T(KC_A)
-#define ALT_S LALT_T(KC_S)
-#define CTL_D LCTL_T(KC_D)
-#define SFT_F LSFT_T(KC_F)
-
-// Right-hand home row mods
-#define SFT_J RSFT_T(KC_J)
-#define CTL_K RCTL_T(KC_K)
-#define ALT_L LALT_T(KC_L)
-#define GUI_SCLN RGUI_T(KC_SCLN)
-
-
-
-// layout parts for easy reuse between keyboard keymaps
-// ,-----+-----+-----+-----+-----,   ,-----+-----+-----+-----+-----,
-// |  1  |  2  |  3  |  4  |  5  |   |  6  |  7  |  8  |  9  |  0  |
-// ,-----+-----+-----+-----+-----,   ,-----+-----+-----+-----+-----,
-#define ________________NUMBERS_L__________________  KC_1, KC_2, KC_3, KC_4, KC_5
-#define ________________NUMBERS_R__________________  KC_6, KC_7, KC_8, KC_9, KC_0
-
-// ,-----+-----+-----+-----+-----,   ,-----+-----+-----+-----+-----,
-// | F1  | F2  | F3  | F4  | F5  |   | F6  | F7  | F8  | F9  | F10 |
-// ,-----+-----+-----+-----+-----,   ,-----+-----+-----+-----+-----,
-#define ______________________F_L__________________  KC_F1, KC_F2, KC_F3, KC_F4, KC_F5
-#define ______________________F_R__________________  KC_F6, KC_F7, KC_F8, KC_F9, KC_F10
-
-// ,-----+-----+-----+-----+-----,   ,-----+-----+-----+-----+-----,
-// |  Q  |  W  |  E  |  R  |  T  |   |  Y  |  U  |  I  |  O  |  P  |
-// ,-----+-----+-----x-----x-----,   ,-----x-----x-----+-----+-----,
-// |  A  |  S  |  D  |  F  |  G  |   |  H  |  J  |  K  |  L  |  ;  |
-// ,-----+-----+-----x-----x-----,   ,-----x-----x-----+-----+-----,
-// |  Z  |  X  |  C  |  V  |  B  |   |  N  |  M  |  ,  |  .  |  /  |
-// ,-----+-----+-----+-----+-----,   ,-----+-----+-----+-----+-----,
-#define _________________QWERTY_L1_________________  KC_Q   , KC_W   , KC_E   , KC_R   , KC_T
-#define _________________QWERTY_L2_________________  KC_A   , KC_S   , KC_D   , KC_F   , KC_G
-#define _________________QWERTY_L3_________________  KC_Z   , KC_X   , KC_C   , KC_V   , KC_B
-
-#define _________________QWERTY_R1_________________  KC_Y   , KC_U   , KC_I   , KC_O   , KC_P
-#define _________________QWERTY_R2_________________  KC_H   , KC_J   , KC_K   , KC_L   , KC_SCLN
-#define _________________QWERTY_R3_________________  KC_N   , KC_M   , KC_COMM, KC_DOT , KC_SLSH
-
-#define _____________MOD_QWERTY_L2_________________  GUI_A, ALT_S, CTL_D, SFT_F, KC_G
-#define _____________MOD_QWERTY_R2_________________  KC_H, SFT_J, CTL_K, ALT_L, GUI_SCLN
-
-// ,-----+-----+-----+-----+-----,   ,-----+-----+-----+-----+-----,
-// |  !  |  @  |  {  |  }  |  _  |   |  \  |  7  |  8  |  9  |     |
-// ,-----+-----+-----x-----x-----,   ,-----x-----x-----+-----+-----,
-// |  #  |  $  |  (  |  )  |  -  |   |  =  |  4  |  5  |  6  |  |  |
-// ,-----+-----+-----x-----x-----,   ,-----x-----x-----+-----+-----,
-// |  %  |  ^  |  [  |  ]  |  +  |   |  *  |  1  |  2  |  3  |  /  |
-// ,-----+-----+-----+-----+-----,   ,-----+-----+-----+-----+-----,
-#define _________________SYMBOL_L1_________________  KC_EXLM, KC_AT  , KC_LCBR, KC_RCBR, KC_UNDS
-#define _________________SYMBOL_L2_________________  KC_HASH, KC_DLR , KC_LPRN, KC_RPRN, KC_MINS
-#define _________________SYMBOL_L3_________________  KC_PERC, KC_CIRC, KC_LBRC, KC_RBRC, KC_PLUS
-
-#define _________________SYMBOL_R1_________________  KC_BSLS, KC_P7, KC_P8 , KC_P9, KC_PAST
-#define _________________SYMBOL_R2_________________  KC_EQL , KC_P4, KC_P5, KC_P6, KC_PPLS
-#define _________________SYMBOL_R3_________________  KC_ASTR, KC_P1, KC_P2, KC_P3, KC_PMNS
-
-enum layers {
-  BASE, // default layer
-  WIN, // Switch keys that are needed in windows
-  SYMB, // symbols
-  MDIA // media keys
-};
-
+/*MAKE SURE THAT ADJUST AND QK_BOOT ARE ACCESSIBLE ON BOTH HALVES!*/
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
-  [BASE] = LAYOUT_5x6_wrapper(
-     KC_EQL , ________________NUMBERS_L__________________,                         ________________NUMBERS_R__________________, KC_MINS,
-     KC_ESC , _________________QWERTY_L1_________________,                         _________________QWERTY_R1_________________, KC_BSLS,
-     KC_F1  , _____________MOD_QWERTY_L2_________________,                         _____________MOD_QWERTY_R2_________________, KC_QUOT,
-     OS_LSFT, _________________QWERTY_L3_________________,                         _________________QWERTY_R3_________________, OS_RSFT,
-                      KC_LEFT,KC_RGHT,                                                       KC_UP, KC_DOWN,
-                                     KC_BSPC, KC_TAB,                         KC_ENT, KC_SPC,
-                                     KC_LGUI, MO(SYMB),                       MO(SYMB), TT(MDIA),
-                                     KC_DEL, KC_GRV,                          TT(WIN), KC_LALT
+/*                 ┌───────┬───────┬───────┬───────┐ ┌───────┬───────┬───────┬───────┐
+ * ┌───────┬───────┤   `   │   "   │  F4   │  F5   │ │RENAME │COMMENT│   ?   │   ?   ├───────┬──────┐
+ * │ UNDO  │ REDO  ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤  F10  │ F11  │
+ * ├───────┼───────┤   W   │   F   │   P   │   B   │ │   J   │   L   │   U   │   Y   ├───────┼──────┤
+ * │SELWORD│   Q   ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤  : ;  │ - _  │
+ * ├───────┼───────┤  R/⎇  │  S/⇧  │  T/⎈  │   G   │ │   M   │  N/⎈  │  E/⇧  │  I/⎇  ├───────┼──────┤
+ * │  ESC  │  A/◆  ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤  O/◆  │ ' "  │
+ * ├───────┼───────┤   X   │   C   │   D   │   V   │ │   K   │   H   │  , <  │  . >  ├───────┼──────┤
+ * │   Z   │REPEAT ├───────┼───────┼───────┴───────┘ └───────┴───────┼───────┼───────┤  / ?  │-> => │
+ * └───────┴───────┤TG_MIC │   ?   │                                 │ AltGr │   `   ├───────┴──────┘
+ *                 └───────┴───────┘                                 └───────┴───────┘
+ *                                 ┏━━━━━━━┳━━━━━━━┓ ┏━━━━━━━┳━━━━━━━┓
+ *                                 ┃  BSPC ┃TAB/NAV| ┃ ⏎/SYM ┃ SPC   ┃
+ *                                 ┡━━━━━━━╋━━━━━━━┫ ┣━━━━━━━╋━━━━━━━┩
+ *                                 │COMPOSE┃1-SHOT⇧┃ ┃1-SHOT⇧┃  UP   │
+ *                                 ├───────╄━━━━━━━┩ ┡━━━━━━━╃───────┤
+ *                                 │PLOVER │CAPS/MS│ │   ?   │ DOWN  │
+ *                                 └───────┴───────┘ └───────┴───────┘       generated by [keymapviz] */
+  [_COLEMAK_DH] = LAYOUT_5x6(
+           UNDO, REDO  , KC_GRV,KC_DQUO, KC_F4 , KC_F5 ,    RFTR_RENAME,COMMENT,KC_NO,KC_NO, KC_F10, KC_F11,
+        SELWORD, KC_Q  , KC_W  , KC_F  , KC_P  , KC_B  ,    KC_J   , KC_L  , KC_U  , KC_Y  ,KC_SCLN,KC_MINS,
+         KC_ESC, HOME_A, HOME_R, HOME_S, HOME_T, KC_G  ,    KC_M   , HOME_N, HOME_E, HOME_I, HOME_O,KC_QUOT,
+           KC_Z, REPEAT, KC_X  , KC_C  , KC_D  , KC_V  ,    KC_K   , KC_H  ,KC_COMM, TD_DOT,KC_SLSH,ARROW_R,
+                         TG_MIC,JOINLN,                                    KC_RALT, KC_GRV,
+                                        KC_BSPC, NAV_TAB,    SYM_ENT,KC_SPC,
+                                        COMPOSE,OS_LSFT,    OS_RSFT, KC_UP ,
+                                        PLOVER ,MS_CAPS,    KC_NO  ,KC_DOWN
   ),
-  [WIN] = LAYOUT_5x6_wrapper(
 
-     _______, _______, _______, _______, _______, _______,                        _______, _______, _______, _______, _______, _______,
-     _______, _______, _______, _______, _______, _______,                        _______, _______, _______, _______, _______, _______,
-     _______, _________________QWERTY_L2_________________,                        _________________QWERTY_R2_________________, _______,
-     _______, _______, _______, _______, _______, _______,                        _______, _______, _______, _______, _______, _______,
-                                             _______, _______,            _______, _______,
-                                             _______, _______,            _______, _______,
-                                             KC_LCTL, _______,            _______, _______,
-                                             _______, _______,            _______, _______
+/*                 ┌───────┬───────┬───────┬───────┐ ┌───────┬───────┬───────┬───────┐
+ * ┌───────┬───────┤  #2   │  #3   │  #4   │  #5   │ │  #6   │  #7   │  #8   │  #9   ├───────┬──────┐
+ * │       │  #1   ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤  NA   │ BSPC │
+ * ├───────┼───────┤   Z   │   N   │   X   │  *1   │ │  *3   │   e   │   n   │   z   ├───────┼──────┤
+ * │       │   F   ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤   f   │  -D  │
+ * ├───────┼───────┤   C   │   P   │   R   │  *2   │ │  *4   │   a   │   p   │   c   ├───────┼──────┤
+ * │       │   S   ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤   s   │  -Z  │
+ * ├───────┼───────┤1-SHOT⎇│1-SHOT⇧│1-SHOT⎈│       │ │       │1-SHOT⎈│1-SHOT⇧│1-SHOT⎇├───────┼──────┤
+ * │       │1-SHOT◆├───────┼───────┼───────┴───────┘ └───────┴───────┼───────┼───────┤1-SHOT◆│      │
+ * └───────┴───────┤       │       │                                 │       │       ├───────┴──────┘
+ *                 └───────┴───────┘                                 └───────┴───────┘
+ *                                 ┏━━━━━━━┳━━━━━━━┓ ┏━━━━━━━┳━━━━━━━┓
+ *                                 ┃   I   ┃   U   ┃ ┃   u   ┃   i   ┃
+ *                                 ┡━━━━━━━╋━━━━━━━┫ ┣━━━━━━━╋━━━━━━━┩
+ *                                 │       ┃TAB/NAV┃ ┃ ⏎/SYM ┃       │
+ *                                 ├───────╄━━━━━━━┩ ┡━━━━━━━╃───────┤
+ *                                 │PLOVER │       │ │       │       │
+ *                                 └───────┴───────┘ └───────┴───────┘       generated by [keymapviz] */
+    [_PLOVER] = LAYOUT_5x6(
+        _______, STN_N1, STN_N2, STN_N3, STN_N4, STN_N5,     STN_N6, STN_N7,  STN_N8,  STN_N9,  STN_NA, KC_BSPC,
+        _______, STN_S1, STN_TL, STN_PL, STN_HL,STN_ST1,    STN_ST3, STN_FR,  STN_PR,  STN_LR,  STN_TR,  STN_DR,
+        _______, STN_S2, STN_KL, STN_WL, STN_RL,STN_ST2,    STN_ST4, STN_RR,  STN_BR,  STN_GR,  STN_SR,  STN_ZR,
+        _______,OS_LGUI,OS_LALT,OS_LSFT,OS_LCTL,_______,    _______,OS_RCTL, OS_RSFT, OS_LALT, OS_RGUI,_______,
+                        _______,_______,                                    _______,_______,
+                                          STN_A,  STN_O,      STN_E,  STN_U,
+                                        _______,NAV_TAB,    SYM_ENT,_______,
+                                        PLOVER ,_______,    _______,_______
+    ),
+
+/*                 ┌───────┬───────┬───────┬───────┐ ┌───────┬───────┬───────┬───────┐
+ * ┌───────┬───────┤  F2   │  F3   │  F4   │  F5   │ │  F6   │  F7   │  F8   │  F9   ├───────┬──────┐
+ * │  F12  │  F1   ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤  F10  │ F11  │
+ * ├───────┼───────┤   2   │   3   │   1   │   5   │ │   6   │   0   │   8   │   9   ├───────┼──────┤
+ * │   X   │   4   ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤   7   │ - _  │
+ * ├───────┼───────┤   [   │   ]   │  "]   │   ?   │ │  {⏎   │   {   │   (   │   )   ├───────┼──────┤
+ * │   ?   │  ["   ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤   }   │  }⏎  │
+ * ├───────┼───────┤   @   │   #   │   $   │   %   │ │   ^   │   &   │   *   │   =   ├───────┼──────┤
+ * │   ~   │   !   ├───────┼───────┼───────┴───────┘ └───────┴───────┼───────┼───────┤   +   │  `   │
+ * └───────┴───────┤       │       │                                 │  , <  │  . >  ├───────┴──────┘
+ *                 └───────┴───────┘                                 └───────┴───────┘
+ *                                 ┏━━━━━━━┳━━━━━━━┓ ┏━━━━━━━┳━━━━━━━┓
+ *                                 ┃  NAV  ┃       ┃ ┃       ┃       ┃
+ *                                 ┡━━━━━━━╋━━━━━━━┫ ┣━━━━━━━╋━━━━━━━┩
+ *                                 │       ┃       ┃ ┃       ┃       │
+ *                                 ├───────╄━━━━━━━┩ ┡━━━━━━━╃───────┤
+ *                                 │       │       │ │ADJUST │ADJUST │
+ *                                 └───────┴───────┘ └───────┴───────┘       generated by [keymapviz] */
+  [_SYM] = LAYOUT_5x6(
+        KC_F12 , KC_F1 , KC_F2 , KC_F3 , KC_F4 , KC_F5 ,    KC_F6  , KC_F7 , KC_F8 , KC_F9 , KC_F10, KC_F11,
+           KC_X, KC_4  , KC_2  , KC_3  , KC_1  , KC_5  ,    KC_6   , KC_0  , KC_8  , KC_9  , KC_7  ,KC_MINS,
+        KC_NO,O_BRQOT,KC_LBRC,KC_RBRC,C_BRQOT,KC_NO,    O_BRACE,KC_LCBR,KC_LPRN,KC_RPRN,KC_RCBR,C_BRACE,
+        KC_TILD,KC_EXLM, KC_AT ,KC_HASH,KC_DLR ,KC_PERC,    KC_CIRC,KC_AMPR,KC_ASTR,KC_EQL ,KC_PLUS, KC_GRV,
+                        _______,_______,                                    KC_COMM, KC_DOT,
+                                          NAV  ,_______,    _______,_______,
+                                        _______,_______,    _______,_______,
+                                        _______,_______,    ADJUST, ADJUST
   ),
 
-  [SYMB] = LAYOUT_5x6_wrapper(
-       KC_F12 , ______________________F_L__________________,                      ______________________F_R__________________, KC_F11,
-       _______, _________________SYMBOL_L1_________________,                      _________________SYMBOL_R1_________________, KC_NLCK,
-       _______, _________________SYMBOL_L2_________________,                      _________________SYMBOL_R2_________________, _______,
-       _______, _________________SYMBOL_L3_________________,                      _________________SYMBOL_R3_________________, _______,
-                                               _______, _______,            KC_P0 , KC_PDOT,
-                                               _______, _______,            _______, _______,
-                                               QK_BOOT, _______,            _______, _______,
-                                               RGB_TOG, _______,            _______, _______
+/*                 ┌───────┬───────┬───────┬───────┐ ┌───────┬───────┬───────┬───────┐
+ * ┌───────┬───────┤  F2   │  F3   │  F4   │  F5   │ │  F6   │  F7   │  F8   │  F9   ├───────┬──────┐
+ * │  F12  │  F1   ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤  F10  │ F11  │
+ * ├───────┼───────┤NumLock│ScrLock│  Ins  │       │ │       │ PGUP  │  UP   │ PGDN  ├───────┼──────┤
+ * │       │       ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤       │ MUTE │
+ * ├───────┼───────┤LALT ⎇ │LSFT ⇧ │LCTL ⎈ │ GNAV  │ │ HOME  │ LEFT  │ DOWN  │ RGHT  ├───────┼──────┤
+ * │CAPS/MS│LGUI ◆ ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤  END  │ VOLU │
+ * ├───────┼───────┤Ctrl+A │Ctrl+C │Ctrl+V │       │ │       │PrintSc│   {   │   }   ├───────┼──────┤
+ * │       │ $yi{  ├───────┼───────┼───────┴───────┘ └───────┴───────┼───────┼───────┤  Ins  │ VOLD │
+ * └───────┴───────┤       │       │                                 │ BRID  │ BRIU  ├───────┴──────┘
+ *                 └───────┴───────┘                                 └───────┴───────┘
+ *                                 ┏━━━━━━━┳━━━━━━━┓ ┏━━━━━━━┳━━━━━━━┓
+ *                                 ┃       ┃       ┃ ┃       ┃       ┃
+ *                                 ┡━━━━━━━╋━━━━━━━┫ ┣━━━━━━━╋━━━━━━━┩
+ *                                 │       ┃       ┃ ┃       ┃       │
+ *                                 ├───────╄━━━━━━━┩ ┡━━━━━━━╃───────┤
+ *                                 │ADJUST │ADJUST │ │       │       │
+ *                                 └───────┴───────┘ └───────┴───────┘       generated by [keymapviz] */
+  [_NAV] = LAYOUT_5x6(
+        KC_F12 , KC_F1 , KC_F2 , KC_F3 , KC_F4 , KC_F5 ,    KC_F6  , KC_F7 , KC_F8 , KC_F9 ,KC_F10 , KC_F11,
+        _______,_______,KC_NLCK,KC_SLCK,KC_INS ,_______,    _______,KC_PGUP, KC_UP ,KC_PGDN,_______,KC_MUTE,
+        MS_CAPS,KC_LGUI,KC_LALT,KC_LSFT,KC_LCTL,  GNAV ,    KC_HOME,KC_LEFT,KC_DOWN,KC_RGHT,KC_END ,KC_VOLU,
+        _______, YICODE,C(KC_A),C(KC_C),C(KC_V),_______,    _______,KC_PSCR,KC_LCBR,KC_RCBR,KC_INS ,KC_VOLD,
+                        _______,_______,                                    KC_BRID,KC_BRIU,
+                                         _______,_______,   _______,_______,
+                                         _______,_______,   _______,_______,
+                                           ADJUST,ADJUST,   _______,_______
   ),
-  [MDIA] = LAYOUT_5x6_wrapper(
 
-     RGB_MOD, RGB_HUI, _______, _______, _______, _______,                        _______, _______, _______, _______, _______, _______,
-     	RGB_M_SN, RGB_HUD, _______, KC_MS_U, _______, KC_WH_U,                        _______, _______, KC_WH_U, _______, _______, _______,
-     RGB_VAI, RGB_SAI, KC_MS_L, KC_MS_D, KC_MS_R, KC_WH_D,                        _______, MOUSE_L, KC_WH_D, MOUSE_R, _______, _______,
-     RGB_VAD, RGB_SAD, _______, _______, _______, _______,                        _______, _______, _______, _______, _______, _______,
-                                             _______, _______,            _______, _______,
-                                             KC_BTN1, KC_BTN2,            _______, _______,
-                                             KC_BTN3, KC_BTN4,            _______, _______,
-                                             KC_BTN5, _______,            _______, _______
+/*                 ┌───────┬───────┬───────┬───────┐ ┌───────┬───────┬───────┬───────┐
+ * ┌───────┬───────┤       │       │       │       │ │       │       │       │       ├───────┬──────┐
+ * │       │       ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤       │      │
+ * ├───────┼───────┤       │       │       │       │ │       │       │ G_UP  │       ├───────┼──────┤
+ * │       │       ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤       │      │
+ * ├───────┼───────┤       │       │       │       │ │G_HOME │       │G_DOWN │       ├───────┼──────┤
+ * │       │       ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤ G_END │      │
+ * ├───────┼───────┤       │       │       │       │ │       │       │       │       ├───────┼──────┤
+ * │       │       ├───────┼───────┼───────┴───────┘ └───────┴───────┼───────┼───────┤       │      │
+ * └───────┴───────┤       │       │                                 │       │       ├───────┴──────┘
+ *                 └───────┴───────┘                                 └───────┴───────┘
+ *                                 ┏━━━━━━━┳━━━━━━━┓ ┏━━━━━━━┳━━━━━━━┓
+ *                                 ┃       ┃       ┃ ┃       ┃       ┃
+ *                                 ┡━━━━━━━╋━━━━━━━┫ ┣━━━━━━━╋━━━━━━━┩
+ *                                 │       ┃       ┃ ┃       ┃       │
+ *                                 ├───────╄━━━━━━━┩ ┡━━━━━━━╃───────┤
+ *                                 │       │       │ │       │       │
+ *                                 └───────┴───────┘ └───────┴───────┘       generated by [keymapviz] */
+    [_GNAV] = LAYOUT_5x6(
+        _______,_______,_______,_______,_______,_______,    _______,_______,_______,_______,_______,_______,
+        _______,_______,_______,_______,_______,_______,    _______,_______, G_UP  ,_______,_______,_______,
+        _______,_______,_______,_______,_______,_______,    G_HOME ,_______, G_DOWN,_______, G_END ,_______,
+        _______,_______,_______,_______,_______,_______,    _______,_______,_______,_______,_______,_______,
+                        _______,_______,                                    _______,_______,
+                                        _______,_______,    _______,_______,
+                                        _______,_______,    _______,_______,
+                                        _______,_______,    _______,_______
+    ),
 
-   ),
+
+#ifdef MOUSEKEY_ENABLE
+/*                 ┌───────┬───────┬───────┬───────┐ ┌───────┬───────┬───────┬───────┐
+ * ┌───────┬───────┤       │       │       │       │ │       │       │       │       ├───────┬──────┐
+ * │       │       ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤       │      │
+ * ├───────┼───────┤       │       │       │       │ │       │   ⯬   │MOUSE ↑│   ⯮   ├───────┼──────┤
+ * │       │       ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤       │      │
+ * ├───────┼───────┤LALT ⎇ │LSFT ⇧ │LCTL ⎈ │       │ │       │MOUSE ←│MOUSE ↓│MOUSE →├───────┼──────┤
+ * │       │LGUI ◆ ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤       │      │
+ * ├───────┼───────┤       │       │       │       │ │       │ BTN3  │WHEEL ↓│WHEEL ↑├───────┼──────┤
+ * │       │       ├───────┼───────┼───────┴───────┘ └───────┴───────┼───────┼───────┤       │      │
+ * └───────┴───────┤       │       │                                 │       │       ├───────┴──────┘
+ *                 └───────┴───────┘                                 └───────┴───────┘
+ *                                 ┏━━━━━━━┳━━━━━━━┓ ┏━━━━━━━┳━━━━━━━┓
+ *                                 ┃       ┃       ┃ ┃ BTN1  ┃ BTN2  ┃
+ *                                 ┡━━━━━━━╋━━━━━━━┫ ┣━━━━━━━╋━━━━━━━┩
+ *                                 │       ┃       ┃ ┃ BTN3  ┃       │
+ *                                 ├───────╄━━━━━━━┩ ┡━━━━━━━╃───────┤
+ *                                 │       │       │ │       │       │
+ *                                 └───────┴───────┘ └───────┴───────┘       generated by [keymapviz] */
+    [_MOUSE] = LAYOUT_5x6(
+        _______,_______,_______,_______,_______,_______,    _______,_______,_______,_______,_______,_______,
+        _______,_______,_______,_______,_______,_______,    _______,KC_WBAK,KC_MS_U,KC_WFWD,_______,_______,
+        _______,KC_LGUI,KC_LALT,KC_LSFT,KC_LCTL,_______,    _______,KC_MS_L,KC_MS_D,KC_MS_R,_______,_______,
+        _______,_______,_______,_______,_______,_______,    _______,KC_BTN3,KC_WH_D,KC_WH_U,_______,_______,
+                       _______,_______,                                    _______,_______,
+                                        _______,_______,    KC_BTN1,KC_BTN2,
+                                        _______,_______,    KC_BTN3,_______,
+                                        _______,_______,    _______,_______
+    ),
+#endif
+
+/*                 ┌───────┬───────┬───────┬───────┐ ┌───────┬───────┬───────┬───────┐
+ * ┌───────┬───────┤       │       │       │       │ │       │       │ INT8  │ LNG9  ├───────┬──────┐
+ * │ UNDO  │ AGAIN ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤ PB_10 │      │
+ * ├───────┼───────┤       │ FIND  │       │EE_CLR │ │       │NKROon │       │       ├───────┼──────┤
+ * │       │       ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤       │      │
+ * ├───────┼───────┤   ⏹   │   ⏯   │   ⏭   │QK_RBT │ │ ⎈ ↔ ◆ │       │  (/⇧  │  )/⇧  ├───────┼──────┤
+ * │ `/Esc │   ⏮   ├───────┼───────┼───────┼───────┤ ├───────┼───────┼───────┼───────┤       │\NUHS|│
+ * ├───────┼───────┤  CUT  │ COPY  │ PASTE │QK_BOOT│ │QK_BOOT│NKROoff│       │       ├───────┼──────┤
+ * │\NUBS| │       ├───────┼───────┼───────┴───────┘ └───────┴───────┼───────┼───────┤ KP /  │      │
+ * └───────┴───────┤       │       │                                 │       │       ├───────┴──────┘
+ *                 └───────┴───────┘                                 └───────┴───────┘
+ *                                 ┏━━━━━━━┳━━━━━━━┓ ┏━━━━━━━┳━━━━━━━┓
+ *                                 ┃       ┃       ┃ ┃       ┃       ┃
+ *                                 ┡━━━━━━━╋━━━━━━━┫ ┣━━━━━━━╋━━━━━━━┩
+ *                                 │       ┃       ┃ ┃       ┃       │
+ *                                 ├───────╄━━━━━━━┩ ┡━━━━━━━╃───────┤
+ *                                 │       │       │ │       │       │
+ *                                 └───────┴───────┘ └───────┴───────┘       generated by [keymapviz] */
+    [_ADJUST] = LAYOUT_5x6(
+        KC_UNDO,KC_AGIN,_______,_______,_______,_______,    _______,_______,KC_INT8,KC_LNG9, PB_10 ,_______,
+        _______,_______,_______,KC_FIND,_______, EE_CLR,    _______, NK_ON ,_______,_______,_______,_______,
+        KC_GESC,KC_MPRV,KC_MSTP,KC_MPLY,KC_MNXT, QK_RBT,    RCG_SWP,_______,KC_LSPO,KC_RSPC,_______,KC_NUHS,
+        KC_NUBS,_______, KC_CUT,KC_COPY,KC_PSTE,QK_BOOT,    QK_BOOT, NK_OFF,_______,_______,KC_PSLS,_______,
+                        _______,_______,                                    _______,_______,
+                                        _______,_______,    _______,_______,
+                                        _______,_______,    _______,_______,
+                                        _______,_______,    _______,_______
+    )
 };
+
+// CAPS_WORD_LOCK: A "smart" Caps Lock key that only capitalizes the next identifier you type
+// and then toggles off Caps Lock automatically when you're done.
+void caps_word_lock_enable(void) {
+    caps_word_lock_on = true;
+    if (!(host_keyboard_led_state().caps_lock)) {
+        tap_code(KC_CAPS);
+    }
+}
+
+void caps_word_lock_disable(void) {
+    caps_word_lock_on = false;
+    unregister_mods(MOD_MASK_SHIFT);
+    if (host_keyboard_led_state().caps_lock) {
+        tap_code(KC_CAPS);
+    }
+}
+
+inline uint8_t get_tap_kc(uint16_t dual_role_key) {
+    // Used to extract the basic tapping keycode from a dual-role key.
+    // Example: get_tap_kc(MT(MOD_RSFT, KC_E)) == KC_E
+    return dual_role_key & 0xFF;
+}
+
+static void process_caps_word_lock(uint16_t keycode, const keyrecord_t *record) {
+    // Update caps word state
+    if (caps_word_lock_on) {
+        switch (keycode) {
+            case QK_MOD_TAP ... QK_MOD_TAP_MAX:
+            case QK_LAYER_TAP ... QK_LAYER_TAP_MAX:
+                // Earlier return if this has not been considered tapped yet
+                if (record->tap.count == 0) { return; }
+                // Get the base tapping keycode of a mod- or layer-tap key
+                keycode = get_tap_kc(keycode);
+                break;
+            default:
+                break;
+        }
+
+        switch (keycode) {
+            // Keycodes to shift
+            case KC_A ... KC_Z:
+                if (record->event.pressed) {
+                    if (get_oneshot_mods() & MOD_MASK_SHIFT) {
+                        caps_word_lock_disable();
+                        add_oneshot_mods(MOD_MASK_SHIFT);
+                    }
+                }
+            // Keycodes that enable caps word but shouldn't get shifted
+            case KC_MINS:
+            case KC_BSPC:
+            case KC_UNDS:
+            case KC_PIPE:
+            case REPEAT:
+            case CAPS_WORD_LOCK:
+            case OS_LSFT:
+            case OS_RSFT:
+            case KC_LPRN:
+            case KC_RPRN:
+                // If chording mods, disable caps word
+                if (record->event.pressed && (get_mods() != MOD_LSFT) && (get_mods() != 0)) {
+                    caps_word_lock_disable();
+                }
+                break;
+            default:
+                // Any other keycode should automatically disable caps
+                if (record->event.pressed && !(get_oneshot_mods() & MOD_MASK_SHIFT)) {
+                    caps_word_lock_disable();
+                }
+                break;
+        }
+    }
+}
+
+uint16_t last_keycode = KC_NO;
+static void process_repeat_key(uint16_t keycode, const keyrecord_t *record) {
+    static uint8_t last_modifier = 0;
+    if (keycode != REPEAT) {
+        // Early return when holding down a pure layer key
+        // to retain modifiers
+        switch (keycode) {
+            case QK_DEF_LAYER ... QK_DEF_LAYER_MAX:
+            case QK_MOMENTARY ... QK_MOMENTARY_MAX:
+            case QK_LAYER_MOD ... QK_LAYER_MOD_MAX:
+            case QK_ONE_SHOT_LAYER ... QK_ONE_SHOT_LAYER_MAX:
+            case QK_TOGGLE_LAYER ... QK_TOGGLE_LAYER_MAX:
+            case QK_TO ... QK_TO_MAX:
+            case QK_LAYER_TAP_TOGGLE ... QK_LAYER_TAP_TOGGLE_MAX:
+                return;
+        }
+        last_modifier = oneshot_mod_state | mod_state;
+        switch (keycode) {
+            case QK_LAYER_TAP ... QK_LAYER_TAP_MAX:
+            case QK_MOD_TAP ... QK_MOD_TAP_MAX:
+                if (record->event.pressed) {
+                    last_keycode = get_tap_kc(keycode);
+                }
+                break;
+            default:
+                if (record->event.pressed) {
+                    last_keycode = keycode;
+                }
+                break;
+        }
+    } else { // keycode == REPEAT
+        if (record->event.pressed) {
+            register_mods(last_modifier);
+            register_code16(last_keycode);
+        } else {
+            unregister_code16(last_keycode);
+            unregister_mods(last_modifier);
+        }
+    }
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+#ifdef CONSOLE_ENABLE
+    uprintf("0x%04X\t%u\t%u\t0x%X\t%b\t0x%02X\t0x%02X\t%u\n",
+         keycode,
+         record->event.key.row,
+         record->event.key.col,
+         layer_state|default_layer_state,
+         record->event.pressed,
+         get_mods(),
+         get_oneshot_mods(),
+         record->tap.count
+         );
+#endif
+    if (!process_select_word(keycode, record, SELWORD)) { return false; }
+    process_caps_word_lock(keycode, record);
+    process_repeat_key(keycode, record);
+
+    mod_state = get_mods();
+    oneshot_mod_state = get_oneshot_mods();
+    switch (keycode) {
+
+
+    case CAPS_WORD_LOCK:
+        // Toggle `caps_word_lock_on`
+        if (record->event.pressed) {
+            if (caps_word_lock_on) {
+                caps_word_lock_disable();
+                return false;
+            } else {
+                caps_word_lock_enable();
+                return false;
+            }
+        }
+        return false;
+
+
+    case KC_SPC:
+        if (oneshot_mod_state & MOD_MASK_SHIFT) {
+            if (record->event.pressed) {
+                tap_code(KC_MINS); // The one-shot shift will convert it to an underscore
+            }
+            return false;
+        }
+        return true;
+
+    case KC_BSPC:
+        {
+        static bool delkey_registered;
+        if (record->event.pressed) {
+            if (mod_state & MOD_MASK_SHIFT) {
+                // In case only one shift is held
+                // see https://stackoverflow.com/questions/1596668/logical-xor-operator-in-c
+                // This also means that in case of holding both shifts and pressing KC_BSPC,
+                // Shift+Delete is sent (useful in Firefox) since the shift modifiers aren't deleted.
+                if (!(mod_state & MOD_BIT(KC_LSHIFT)) != !(mod_state & MOD_BIT(KC_RSHIFT))) {
+                    del_mods(MOD_MASK_SHIFT);
+                }
+                register_code(KC_DEL);
+                delkey_registered = true;
+                set_mods(mod_state);
+                return false;
+            }
+        } else {
+            if (delkey_registered) {
+                unregister_code(KC_DEL);
+                delkey_registered = false;
+                return false;
+            }
+        }
+        return true;
+    }
+
+    case ARROW_R:
+      if (record->event.pressed) {
+          if ((mod_state|oneshot_mod_state) & MOD_MASK_SHIFT) {
+            del_mods(MOD_MASK_SHIFT);
+            del_oneshot_mods(MOD_MASK_SHIFT);
+            send_string("=>");
+            set_mods(mod_state);
+          } else {
+            SEND_STRING("->");
+          }
+      }
+      return false;
+
+    case G_DOWN:
+        if (record->event.pressed) {
+            register_code(KC_G);
+            register_code(KC_DOWN);
+        } else {
+            unregister_code(KC_G);
+            unregister_code(KC_DOWN);
+        }
+        return false;
+
+    case G_UP:
+        if (record->event.pressed) {
+            register_code(KC_G);
+            register_code(KC_UP);
+        } else {
+            unregister_code(KC_G);
+            unregister_code(KC_UP);
+        }
+        return false;
+
+    case G_HOME:
+        if (record->event.pressed) {
+            register_code(KC_G);
+            register_code(KC_HOME);
+        } else {
+            unregister_code(KC_G);
+            unregister_code(KC_HOME);
+        }
+	    return false;
+
+    case G_END:
+        if (record->event.pressed) {
+            register_code(KC_G);
+            register_code(KC_END);
+        } else {
+            unregister_code(KC_G);
+            unregister_code(KC_END);
+        }
+		return false;
+
+    case UPDIR:
+        if (record->event.pressed) {
+            tap_code(KC_DOT);
+            tap_code(KC_DOT);
+            tap_code(KC_SLSH);
+        }
+        return false;
+
+    case YICODE:
+        if (record->event.pressed) {
+            send_string("$yi{");
+        }
+        return false;
+
+    case O_BRACE:
+        if (record->event.pressed) {
+            tap_code16(KC_LEFT_CURLY_BRACE);
+            tap_code(KC_ENTER);
+        }
+        return false;
+
+    case C_BRACE:
+        if (record->event.pressed) {
+            tap_code16(KC_RIGHT_CURLY_BRACE);
+            tap_code(KC_ENTER);
+        }
+        return false;
+
+    case O_BRQOT:
+        if (record->event.pressed) {
+            tap_code(KC_LEFT_BRACKET);
+            tap_code16(KC_DOUBLE_QUOTE);
+        }
+        return false;
+
+    case C_BRQOT:
+        if (record->event.pressed) {
+            tap_code16(KC_DOUBLE_QUOTE);
+            tap_code(KC_RIGHT_BRACKET);
+        }
+        return false;
+
+    case JOINLN:  // Join lines like Vim's `J` command.
+        SEND_STRING( // Go to the end of the line and tap delete.
+            SS_TAP(X_END) SS_TAP(X_DEL)
+            // In case this has joined two words together, insert one space.
+            SS_TAP(X_SPC)
+            SS_LCTL(
+              // Go to the beginning of the next word.
+              SS_TAP(X_RGHT) SS_TAP(X_LEFT)
+              // Select back to the end of the previous word. This should select
+              // all spaces and tabs between the joined lines from indentation
+              // or trailing whitespace, including the space inserted earlier.
+              SS_LSFT(SS_TAP(X_LEFT) SS_TAP(X_RGHT)))
+            // Replace the selection with a single space.
+            SS_TAP(X_SPC));
+        return false;
+    }
+    return true;
+};
+
+#ifdef TAPPING_FORCE_HOLD_PER_KEY
+bool get_tapping_force_hold(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case NAV_TAB:
+        case HOME_R: // I like to hold Ctrl+R to redo many changes in Vim
+            return false;
+        default:
+            return true;
+    }
+}
+#endif
+
+#ifdef HOLD_ON_OTHER_KEY_PRESS_PER_KEY
+bool get_hold_on_other_key_press(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case QK_LAYER_TAP ... QK_LAYER_TAP_MAX:
+            // Immediately select the hold action when another key is pressed.
+            return true;
+        default:
+            // Do not select the hold action when another key is pressed.
+            return false;
+    }
+}
+#endif
+
+#ifdef TAPPING_TERM_PER_KEY
+uint16_t get_tapping_term(uint16_t keycode, keyrecord_t *record) {
+    switch (keycode) {
+        case HOME_O:
+            return TAPPING_TERM + 30;
+        case SYM_ENT:
+            // Very low tapping term to make sure I don't hit Enter accidentally.
+            return TAPPING_TERM - 85;
+        default:
+            return TAPPING_TERM;
+    }
+};
+#endif
+

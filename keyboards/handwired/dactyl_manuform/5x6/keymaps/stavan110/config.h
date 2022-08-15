@@ -1,43 +1,50 @@
-/*
-Copyright 2012 Jun Wako <wakojun@gmail.com>
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 2 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
-
 #pragma once
 
-#define USE_SERIAL
+// Home row mods settings //
 
-#define MASTER_LEFT
-//#define MASTER_RIGHT
-
-//#define EE_HANDS
-
-
-// Home-Row-Mod configuration
-// Configure the global tapping term (default: 200ms)
-#define TAPPING_TERM 350
+// Default tapping term is 200
+#define TAPPING_TERM 300
+#define TAPPING_TERM_PER_KEY // See bottom of keymap.c
 
 // Prevent normal rollover on alphas from accidentally triggering mods.
+// No longer necessary with “[IGNORE_MOD_TAP_INTERRUPT by default](https://github.com/qmk/qmk_firmware/pull/15741)”
 #define IGNORE_MOD_TAP_INTERRUPT
+
+// This prevents accidental repeats of the tap-hold keys when typing quickly.
+#define TAPPING_FORCE_HOLD_PER_KEY
 
 // Disable PERMISSIVE_HOLD
 // (It's enabled dy default for all Dactyl Manuform boards,
 // so it requires explicit undef to disable)
 #undef PERMISSIVE_HOLD
 
-// Enable rapid switch from tap to hold, disables double tap hold auto-repeat.
-#define TAPPING_FORCE_HOLD
+// Other settings //
+#define HOLD_ON_OTHER_KEY_PRESS_PER_KEY
 
+#define COMBO_TERM 70
 
+// Limits the max. amount of layers to 8 to save firmware memory.
+#define LAYER_STATE_8BIT
+
+// Save firmware space
+// Strip away all prints except `uprintf`
+#define USER_PRINT
+// Disable hardware lock switches support to free up space
+#undef LOCKING_SUPPORT_ENABLE
+#undef LOCKING_RESYNC_ENABLE
+
+// Shamelessly stolen mouse key settings from @pierrechevalier83 //
+
+// Set the mouse settings to a comfortable speed/accuracy trade-off
+// Assume the screen refresh rate is 60 Hz or higher
+// The default is 50. This makes the mouse ~3 times faster and more accurate
+// #undef to override default settings
+#undef MOUSEKEY_INTERVAL
+#define MOUSEKEY_INTERVAL 16
+// The default is 20. Since we made the mouse about 3 times faster with the previous setting,
+// give it more time to accelerate to max speed to retain precise control over short distances.
+#undef MOUSEKEY_TIME_TO_MAX
+#define MOUSEKEY_TIME_TO_MAX 40
+// The default is 300. Let's try and make this as low as possible while keeping the cursor responsive
+#undef MOUSEKEY_DELAY
+#define MOUSEKEY_DELAY 100
